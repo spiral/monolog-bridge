@@ -13,7 +13,7 @@
 >
 
     <testsuites>
-        <testsuite name="LogFactory integration based on Monolog package">
+        <testsuite name="Monolog adapter for Spiral Framework">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>

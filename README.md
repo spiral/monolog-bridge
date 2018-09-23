@@ -1,5 +1,5 @@
-LogFactory integration based on Monolog package
+Monolog adapter for Spiral Framework
 ================================
-[![Latest Stable Version](https://poser.pugx.org/spiral/logger/version)](https://packagist.org/packages/spiral/logger)
-[![Build Status](https://travis-ci.org/spiral/logger.svg?branch=master)](https://travis-ci.org/spiral/logger)
-[![Codecov](https://codecov.io/gh/spiral/logger/branch/master/graph/badge.svg)](https://codecov.io/gh/spiral/logger/)
+[![Latest Stable Version](https://poser.pugx.org/spiral/monolog/version)](https://packagist.org/packages/spiral/monolog)
+[![Build Status](https://travis-ci.org/spiral/monolog.svg?branch=master)](https://travis-ci.org/spiral/monolog)
+[![Codecov](https://codecov.io/gh/spiral/monolog/branch/master/graph/badge.svg)](https://codecov.io/gh/spiral/monolog/)
