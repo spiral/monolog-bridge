@@ -1,0 +1,33 @@
+{
+  "name": "spiral/monolog",
+  "type": "library",
+  "description": "LogFactory integration based on Monolog package",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Anton Titov / Wolfy-J",
+      "email": "wolfy.jd@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "spiral/core": "^1.0",
+    "spiral/logger": "^1.0",
+    "monolog/monolog": "^1.23",
+    "symfony/event-dispatcher": "^4.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~7.0",
+    "mockery/mockery": "^1.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Spiral\\Monolog\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Spiral\\Monolog\\Tests\\": "tests/Monolog/"
+    }
+  }
+}
