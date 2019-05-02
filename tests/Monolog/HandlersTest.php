@@ -11,12 +11,14 @@ namespace Spiral\Logger\Tests;
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
-use Spiral\Core\BootloadManager;
+use Spiral\Boot\BootloadManager;
+use Spiral\Config\ConfigManager;
+use Spiral\Config\ConfiguratorInterface;
+use Spiral\Config\LoaderInterface;
 use Spiral\Core\Container;
 use Spiral\Logger\LogsInterface;
 use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\Monolog\Config\MonologConfig;
-use Spiral\Monolog\Event\EventHandler;
 
 class HandlersTest extends TestCase
 {
@@ -26,6 +28,20 @@ class HandlersTest extends TestCase
     public function setUp()
     {
         $this->container = new Container();
+        $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
+            new class implements LoaderInterface
+            {
+                public function has(string $section): bool
+                {
+                    return false;
+                }
+
+                public function load(string $section): array
+                {
+                    return [];
+                }
+            }
+        ));
         $this->container->get(BootloadManager::class)->bootload([MonologBootloader::class]);
     }
 
@@ -52,7 +68,6 @@ class HandlersTest extends TestCase
         $logger = $this->getLogger();
         $this->assertSame("test", $logger->getName());
         $this->assertCount(1, $logger->getHandlers());
-        $this->assertInstanceOf(EventHandler::class, $logger->getHandlers()[0]);
     }
 
     /**

@@ -11,7 +11,10 @@ namespace Spiral\Logger\Tests;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
-use Spiral\Core\BootloadManager;
+use Spiral\Boot\BootloadManager;
+use Spiral\Config\ConfigManager;
+use Spiral\Config\ConfiguratorInterface;
+use Spiral\Config\LoaderInterface;
 use Spiral\Core\Container;
 use Spiral\Core\ContainerScope;
 use Spiral\Logger\Traits\LoggerTrait;
@@ -44,6 +47,20 @@ class TraitTest extends TestCase
     public function testScope()
     {
         $container = new Container();
+        $container->bind(ConfiguratorInterface::class, new ConfigManager(
+            new class implements LoaderInterface
+            {
+                public function has(string $section): bool
+                {
+                    return false;
+                }
+
+                public function load(string $section): array
+                {
+                    return [];
+                }
+            }
+        ));
         $container->get(BootloadManager::class)->bootload([MonologBootloader::class]);
         $container->bind(MonologConfig::class, new MonologConfig());
 

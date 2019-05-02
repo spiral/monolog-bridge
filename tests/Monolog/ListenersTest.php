@@ -8,7 +8,6 @@
 
 namespace Spiral\Logger\Tests;
 
-
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
@@ -16,7 +15,6 @@ use Spiral\Core\Container;
 use Spiral\Logger\Event\LogEvent;
 use Spiral\Monolog\Config\MonologConfig;
 use Spiral\Monolog\LogFactory;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class ListenersTest extends TestCase
 {
@@ -24,7 +22,7 @@ class ListenersTest extends TestCase
     {
         $factory = new LogFactory(new MonologConfig([
             'globalLevel' => Logger::DEBUG
-        ]), new Container(), new EventDispatcher());
+        ]), new Container());
 
         $logger = $factory->getLogger();
         $other = $factory->getLogger("other");
@@ -55,7 +53,7 @@ class ListenersTest extends TestCase
     {
         $factory = new LogFactory(new MonologConfig([
             'globalLevel' => Logger::ERROR
-        ]), new Container(), new EventDispatcher());
+        ]), new Container());
 
         $logger = $factory->getLogger();
         $other = $factory->getLogger("other");

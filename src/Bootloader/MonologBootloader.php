@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Monolog\Bootloader;
 
@@ -13,28 +14,59 @@ use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use Spiral\Core\Bootloader\Bootloader;
+use Spiral\Boot\Bootloader\Bootloader;
+use Spiral\Config\ConfiguratorInterface;
+use Spiral\Config\Patch\Append;
 use Spiral\Core\Container;
 use Spiral\Logger\LogsInterface;
 use Spiral\Monolog\LogFactory;
 
 class MonologBootloader extends Bootloader implements Container\SingletonInterface
 {
-    const BOOT       = true;
     const SINGLETONS = [
         LogsInterface::class   => LogFactory::class,
         LoggerInterface::class => Logger::class
     ];
-    const BINDINGS   = [
+
+    const BINDINGS = [
         'log.rotate' => [self::class, 'logRotate']
     ];
+
+    /** @var ConfiguratorInterface */
+    private $config;
+
+    /**
+     * @param ConfiguratorInterface $config
+     */
+    public function __construct(ConfiguratorInterface $config)
+    {
+        $this->config = $config;
+    }
 
     /**
      * @param Container $container
      */
     public function boot(Container $container)
     {
+        $this->config->setDefaults('monolog', [
+            'globalLevel' => Logger::DEBUG,
+            'handlers'    => []
+        ]);
+
         $container->bindInjector(Logger::class, LogFactory::class);
+    }
+
+    /**
+     * @param string           $channel
+     * @param HandlerInterface $handler
+     */
+    public function addHandler(string $channel, HandlerInterface $handler)
+    {
+        $this->config->modify('monolog', new Append(
+            'handlers',
+            $channel,
+            $handler
+        ));
     }
 
     /**

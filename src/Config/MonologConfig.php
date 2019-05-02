@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Monolog\Config;
 
@@ -13,7 +14,7 @@ use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
 use Spiral\Monolog\Exception\ConfigException;
 
-class MonologConfig extends InjectableConfig
+final class MonologConfig extends InjectableConfig
 {
     const CONFIG = 'monolog';
 

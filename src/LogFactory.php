@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Monolog;
 
@@ -18,11 +19,9 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Logger\LogsInterface;
 use Spiral\Monolog\Config\MonologConfig;
-use Spiral\Monolog\Event\EventHandler;
 use Spiral\Monolog\Exception\ConfigException;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class LogFactory implements LogsInterface, InjectorInterface, SingletonInterface
+final class LogFactory implements LogsInterface, InjectorInterface, SingletonInterface
 {
     // Default logger channel (supplied via injection)
     public const DEFAULT = 'default';
@@ -39,42 +38,18 @@ class LogFactory implements LogsInterface, InjectorInterface, SingletonInterface
     /** @var FactoryInterface */
     private $factory;
 
-    /** @var EventDispatcher */
-    private $dispatcher;
-
     /** @var HandlerInterface|null */
-    private $globalHandler;
+    private $eventHandler;
 
     /**
      * @param MonologConfig    $config
      * @param FactoryInterface $factory
-     * @param EventDispatcher  $dispatcher
      */
-    public function __construct(
-        MonologConfig $config,
-        FactoryInterface $factory,
-        EventDispatcher $dispatcher
-    ) {
+    public function __construct(MonologConfig $config, FactoryInterface $factory)
+    {
         $this->config = $config;
         $this->factory = $factory;
-        $this->dispatcher = $dispatcher;
-        $this->globalHandler = new EventHandler($config->getEventLevel(), $this->dispatcher);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function addListener(callable $listener)
-    {
-        $this->dispatcher->addListener(self::LOG_EVENT, $listener);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function removeListener(callable $listener)
-    {
-        $this->dispatcher->removeListener(self::LOG_EVENT, $listener);
+        $this->eventHandler = new EventHandler($config->getEventLevel());
     }
 
     /**
@@ -112,6 +87,22 @@ class LogFactory implements LogsInterface, InjectorInterface, SingletonInterface
     }
 
     /**
+     * @param callable $listener
+     */
+    public function addListener(callable $listener)
+    {
+        $this->eventHandler->addListener($listener);
+    }
+
+    /**
+     * @param callable $listener
+     */
+    public function removeListener(callable $listener)
+    {
+        $this->eventHandler->removeListener($listener);
+    }
+
+    /**
      * Get list of channel specific handlers.
      *
      * @param string $channel
@@ -132,7 +123,7 @@ class LogFactory implements LogsInterface, InjectorInterface, SingletonInterface
             }
         }
 
-        $handlers[] = $this->globalHandler;
+        $handlers[] = $this->eventHandler;
 
         return $handlers;
     }
