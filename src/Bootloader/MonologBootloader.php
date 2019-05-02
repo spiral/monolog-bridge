@@ -21,7 +21,7 @@ use Spiral\Core\Container;
 use Spiral\Logger\LogsInterface;
 use Spiral\Monolog\LogFactory;
 
-class MonologBootloader extends Bootloader implements Container\SingletonInterface
+final class MonologBootloader extends Bootloader implements Container\SingletonInterface
 {
     const SINGLETONS = [
         LogsInterface::class   => LogFactory::class,
