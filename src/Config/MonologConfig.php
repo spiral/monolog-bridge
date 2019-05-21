@@ -45,6 +45,11 @@ final class MonologConfig extends InjectableConfig
         }
 
         foreach ($this->config['handlers'][$channel] as $handler) {
+            if (is_object($handler) && !$handler instanceof Autowire) {
+                yield $handler;
+                continue;
+            }
+
             $wire = $this->wire($channel, $handler);
             if (!empty($wire)) {
                 yield $wire;

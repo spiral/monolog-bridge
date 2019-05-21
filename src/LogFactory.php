@@ -14,6 +14,7 @@ use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Log\LoggerInterface;
+use Spiral\Core\Container\Autowire;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
@@ -116,6 +117,11 @@ final class LogFactory implements LogsInterface, InjectorInterface, SingletonInt
         $handlers = [];
 
         foreach ($this->config->getHandlers($channel) as $handler) {
+            if (!$handler instanceof Autowire) {
+                $handlers[] = $handler;
+                continue;
+            }
+
             try {
                 $handlers[] = $handler->resolve($this->factory);
             } catch (ContainerExceptionInterface $e) {

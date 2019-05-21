@@ -62,9 +62,13 @@ final class MonologBootloader extends Bootloader implements Container\SingletonI
      */
     public function addHandler(string $channel, HandlerInterface $handler)
     {
+        if (!isset($this->config->getConfig('monolog')['handlers'][$channel])) {
+            $this->config->modify('monolog', new Append('handlers', $channel, []));
+        }
+
         $this->config->modify('monolog', new Append(
-            'handlers',
-            $channel,
+            'handlers.' . $channel,
+            null,
             $handler
         ));
     }
