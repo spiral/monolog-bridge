@@ -92,7 +92,7 @@ final class MonologBootloader extends Bootloader implements Container\SingletonI
             $level,
             $bubble,
             null,
-            false
+            true
         );
 
         return $handler->setFormatter(
