@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "php": "^7.1",
+    "php": "^7.2",
     "spiral/boot": "^1.0",
     "monolog/monolog": "^1.23"
   },
