@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Monolog\Bootloader;
@@ -23,12 +25,12 @@ use Spiral\Monolog\LogFactory;
 
 final class MonologBootloader extends Bootloader implements Container\SingletonInterface
 {
-    const SINGLETONS = [
+    protected const SINGLETONS = [
         LogsInterface::class   => LogFactory::class,
         LoggerInterface::class => Logger::class
     ];
 
-    const BINDINGS = [
+    protected const BINDINGS = [
         'log.rotate' => [self::class, 'logRotate']
     ];
 
@@ -46,7 +48,7 @@ final class MonologBootloader extends Bootloader implements Container\SingletonI
     /**
      * @param Container $container
      */
-    public function boot(Container $container)
+    public function boot(Container $container): void
     {
         $this->config->setDefaults('monolog', [
             'globalLevel' => Logger::DEBUG,
@@ -60,7 +62,7 @@ final class MonologBootloader extends Bootloader implements Container\SingletonI
      * @param string           $channel
      * @param HandlerInterface $handler
      */
-    public function addHandler(string $channel, HandlerInterface $handler)
+    public function addHandler(string $channel, HandlerInterface $handler): void
     {
         if (!isset($this->config->getConfig('monolog')['handlers'][$channel])) {
             $this->config->modify('monolog', new Append('handlers', $channel, []));

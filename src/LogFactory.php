@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Monolog;
@@ -16,19 +18,16 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\Container\InjectorInterface;
-use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
+use Spiral\Logger\ListenerRegistryInterface;
 use Spiral\Logger\LogsInterface;
 use Spiral\Monolog\Config\MonologConfig;
 use Spiral\Monolog\Exception\ConfigException;
 
-final class LogFactory implements LogsInterface, InjectorInterface, SingletonInterface
+final class LogFactory implements LogsInterface, InjectorInterface
 {
     // Default logger channel (supplied via injection)
     public const DEFAULT = 'default';
-
-    // Name of log event fired by global log handler
-    public const LOG_EVENT = 'log';
 
     /** @var MonologConfig */
     private $config;
@@ -43,14 +42,18 @@ final class LogFactory implements LogsInterface, InjectorInterface, SingletonInt
     private $eventHandler;
 
     /**
-     * @param MonologConfig    $config
-     * @param FactoryInterface $factory
+     * @param MonologConfig             $config
+     * @param ListenerRegistryInterface $listenerRegistry
+     * @param FactoryInterface          $factory
      */
-    public function __construct(MonologConfig $config, FactoryInterface $factory)
-    {
+    public function __construct(
+        MonologConfig $config,
+        ListenerRegistryInterface $listenerRegistry,
+        FactoryInterface $factory
+    ) {
         $this->config = $config;
         $this->factory = $factory;
-        $this->eventHandler = new EventHandler($config->getEventLevel());
+        $this->eventHandler = new EventHandler($listenerRegistry, $config->getEventLevel());
     }
 
     /**
@@ -59,7 +62,7 @@ final class LogFactory implements LogsInterface, InjectorInterface, SingletonInt
     public function getLogger(string $channel = null): LoggerInterface
     {
         if ($channel === null || $channel == self::DEFAULT) {
-            if (!empty($this->default)) {
+            if ($this->default !== null) {
                 // we should use only one default logger per system
                 return $this->default;
             }
@@ -85,22 +88,6 @@ final class LogFactory implements LogsInterface, InjectorInterface, SingletonInt
     {
         // always return default logger as injection
         return $this->getLogger();
-    }
-
-    /**
-     * @param callable $listener
-     */
-    public function addListener(callable $listener)
-    {
-        $this->eventHandler->addListener($listener);
-    }
-
-    /**
-     * @param callable $listener
-     */
-    public function removeListener(callable $listener)
-    {
-        $this->eventHandler->removeListener($listener);
     }
 
     /**

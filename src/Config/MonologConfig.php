@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Monolog\Config;
@@ -16,7 +18,7 @@ use Spiral\Monolog\Exception\ConfigException;
 
 final class MonologConfig extends InjectableConfig
 {
-    const CONFIG = 'monolog';
+    public const CONFIG = 'monolog';
 
     /** @var array */
     protected $config = [

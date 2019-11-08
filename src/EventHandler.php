@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Monolog;
@@ -12,31 +14,26 @@ namespace Spiral\Monolog;
 use Monolog\Handler\AbstractHandler;
 use Monolog\Logger;
 use Spiral\Logger\Event\LogEvent;
+use Spiral\Logger\ListenerRegistryInterface;
 
 final class EventHandler extends AbstractHandler
 {
-    /** @var callable[] */
-    private $listeners = [];
+    /** @var ListenerRegistryInterface */
+    private $listenerRegistry;
 
     /**
-     * @param callable $listener
+     * @param ListenerRegistryInterface $listenerRegistry
+     * @param int                       $level
+     * @param bool                      $bubble
      */
-    public function addListener(callable $listener)
-    {
-        if (!array_search($listener, $this->listeners, true)) {
-            $this->listeners[] = $listener;
-        }
-    }
+    public function __construct(
+        ListenerRegistryInterface $listenerRegistry,
+        int $level = Logger::DEBUG,
+        bool $bubble = true
+    ) {
+        $this->listenerRegistry = $listenerRegistry;
 
-    /**
-     * @param callable $listener
-     */
-    public function removeListener(callable $listener)
-    {
-        $key = array_search($listener, $this->listeners, true);
-        if ($key !== null) {
-            unset($this->listeners[$key]);
-        }
+        parent::__construct($level, $bubble);
     }
 
     /**
@@ -53,7 +50,7 @@ final class EventHandler extends AbstractHandler
             $record['context']
         );
 
-        foreach ($this->listeners as $listener) {
+        foreach ($this->listenerRegistry->getListeners() as $listener) {
             call_user_func($listener, $e);
         }
     }

@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
+declare(strict_types=1);
 
 namespace Spiral\Logger\Tests;
 
@@ -17,6 +20,8 @@ use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\LoaderInterface;
 use Spiral\Core\Container;
 use Spiral\Core\ContainerScope;
+use Spiral\Logger\ListenerRegistry;
+use Spiral\Logger\ListenerRegistryInterface;
 use Spiral\Logger\Traits\LoggerTrait;
 use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\Monolog\Config\MonologConfig;
@@ -25,31 +30,30 @@ class TraitTest extends TestCase
 {
     use LoggerTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->logger = null;
     }
 
-    public function testNoScope()
+    public function testNoScope(): void
     {
         $logger = $this->getLogger();
         $this->assertInstanceOf(NullLogger::class, $this->getLogger());
         $this->assertSame($logger, $this->getLogger());
     }
 
-    public function testSetLogger()
+    public function testSetLogger(): void
     {
         $logger = new NullLogger();
         $this->setLogger($logger);
         $this->assertSame($logger, $this->getLogger());
     }
 
-    public function testScope()
+    public function testScope(): void
     {
         $container = new Container();
         $container->bind(ConfiguratorInterface::class, new ConfigManager(
-            new class implements LoaderInterface
-            {
+            new class() implements LoaderInterface {
                 public function has(string $section): bool
                 {
                     return false;
@@ -63,8 +67,9 @@ class TraitTest extends TestCase
         ));
         $container->get(BootloadManager::class)->bootload([MonologBootloader::class]);
         $container->bind(MonologConfig::class, new MonologConfig());
+        $container->bind(ListenerRegistryInterface::class, new ListenerRegistry());
 
-        ContainerScope::runScope($container, function () {
+        ContainerScope::runScope($container, function (): void {
             $this->assertInstanceOf(Logger::class, $this->getLogger());
             $this->assertSame(self::class, $this->getLogger()->getName());
         });

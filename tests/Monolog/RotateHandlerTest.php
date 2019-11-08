@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
+declare(strict_types=1);
 
 namespace Spiral\Logger\Tests;
 
@@ -20,12 +23,11 @@ use Spiral\Monolog\Bootloader\MonologBootloader;
 
 class RotateHandlerTest extends TestCase
 {
-    public function testRotateHandler()
+    public function testRotateHandler(): void
     {
         $container = new Container();
         $container->bind(ConfiguratorInterface::class, new ConfigManager(
-            new class implements LoaderInterface
-            {
+            new class() implements LoaderInterface {
                 public function has(string $section): bool
                 {
                     return false;
