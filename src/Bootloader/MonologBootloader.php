@@ -98,7 +98,7 @@ final class MonologBootloader extends Bootloader implements Container\SingletonI
         );
 
         return $handler->setFormatter(
-            new LineFormatter("[%datetime%] %level_name%: %message%\n")
+            new LineFormatter("[%datetime%] %level_name%: %message% %context%\n")
         );
     }
 }
