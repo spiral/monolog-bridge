@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Spiral\Monolog\Bootloader;
@@ -18,6 +11,7 @@ use Monolog\Logger;
 use Monolog\ResettableInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Boot\Bootloader\Bootloader;
+use Spiral\Boot\EnvironmentInterface;
 use Spiral\Boot\FinalizerInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Append;
@@ -37,17 +31,18 @@ final class MonologBootloader extends Bootloader implements Container\SingletonI
         'log.rotate' => [self::class, 'logRotate'],
     ];
 
-    /** @var ConfiguratorInterface */
-    private $config;
-
-    public function __construct(ConfiguratorInterface $config)
-    {
-        $this->config = $config;
+    public function __construct(
+        private readonly ConfiguratorInterface $config
+    ) {
     }
 
-    public function boot(Container $container, FinalizerInterface $finalizer): void
+    public function init(Container $container, FinalizerInterface $finalizer, EnvironmentInterface $env): void
     {
-        $finalizer->addFinalizer(static function () use ($container): void {
+        $finalizer->addFinalizer(static function (bool $terminate) use ($container): void {
+            if ($terminate) {
+                return;
+            }
+
             if ($container->hasInstance(LoggerInterface::class)) {
                 $logger = $container->get(LoggerInterface::class);
 
@@ -66,6 +61,7 @@ final class MonologBootloader extends Bootloader implements Container\SingletonI
         });
 
         $this->config->setDefaults(MonologConfig::CONFIG, [
+            'default' => $env->get('MONOLOG_DEFAULT_CHANNEL', MonologConfig::DEFAULT_CHANNEL),
             'globalLevel' => Logger::DEBUG,
             'handlers' => [],
         ]);
@@ -75,14 +71,12 @@ final class MonologBootloader extends Bootloader implements Container\SingletonI
 
     public function addHandler(string $channel, HandlerInterface $handler): void
     {
-        $name = MonologConfig::CONFIG;
-
-        if (!isset($this->config->getConfig($name)['handlers'][$channel])) {
-            $this->config->modify($name, new Append('handlers', $channel, []));
+        if (!isset($this->config->getConfig(MonologConfig::CONFIG)['handlers'][$channel])) {
+            $this->config->modify(MonologConfig::CONFIG, new Append('handlers', $channel, []));
         }
 
         $this->config->modify(
-            $name,
+            MonologConfig::CONFIG,
             new Append(
                 'handlers.' . $channel,
                 null,
