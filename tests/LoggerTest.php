@@ -23,7 +23,7 @@ class LoggerTest extends BaseTestCase
 {
     use MockeryPHPUnitIntegration;
 
-    public function testLoggerShouldBeReset(): void
+    public function testLoggerShouldBeReset()
     {
         $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
             new class() implements LoaderInterface {

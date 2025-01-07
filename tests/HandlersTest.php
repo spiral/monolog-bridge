@@ -52,8 +52,8 @@ class HandlersTest extends BaseTestCase
         $this->container->bind(MonologConfig::class, new MonologConfig());
 
         $logger = $this->getLogger();
-        self::assertSame('test', $logger->getName());
-        self::assertCount(1, $logger->getHandlers());
+        $this->assertSame('test', $logger->getName());
+        $this->assertCount(1, $logger->getHandlers());
     }
 
     public function testDefaultHandler(): void
@@ -63,8 +63,8 @@ class HandlersTest extends BaseTestCase
         ]));
 
         $logger = $this->getLogger();
-        self::assertSame('test', $logger->getName());
-        self::assertCount(1, $logger->getHandlers());
+        $this->assertSame('test', $logger->getName());
+        $this->assertCount(1, $logger->getHandlers());
     }
 
     public function testInvalidHandler(): void
@@ -95,8 +95,8 @@ class HandlersTest extends BaseTestCase
 
         $logger = $this->getLogger();
 
-        self::assertCount(2, $logger->getHandlers());
-        self::assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
+        $this->assertCount(2, $logger->getHandlers());
+        $this->assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
     }
 
     public function testBindedHandler(): void
@@ -112,9 +112,9 @@ class HandlersTest extends BaseTestCase
 
         $logger = $this->getLogger();
 
-        self::assertCount(2, $logger->getHandlers());
-        self::assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
-        self::assertSame($this->container->get('nullHandler'), $logger->getHandlers()[0]);
+        $this->assertCount(2, $logger->getHandlers());
+        $this->assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
+        $this->assertSame($this->container->get('nullHandler'), $logger->getHandlers()[0]);
     }
 
     public function testConstructHandler(): void
@@ -131,8 +131,8 @@ class HandlersTest extends BaseTestCase
 
         $logger = $this->getLogger();
 
-        self::assertCount(2, $logger->getHandlers());
-        self::assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
+        $this->assertCount(2, $logger->getHandlers());
+        $this->assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
     }
 
     public function testConstructWithOptionsHandler(): void
@@ -152,11 +152,11 @@ class HandlersTest extends BaseTestCase
 
         $logger = $this->getLogger();
 
-        self::assertCount(2, $logger->getHandlers());
-        self::assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
+        $this->assertCount(2, $logger->getHandlers());
+        $this->assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
 
-        self::assertFalse($logger->getHandlers()[0]->isHandling($this->createLogRecord(Logger::DEBUG)));
-        self::assertTrue($logger->getHandlers()[0]->isHandling($this->createLogRecord(Logger::CRITICAL)));
+        $this->assertFalse($logger->getHandlers()[0]->isHandling($this->createLogRecord(Logger::DEBUG)));
+        $this->assertTrue($logger->getHandlers()[0]->isHandling($this->createLogRecord(Logger::CRITICAL)));
     }
 
     protected function getLogger(): Logger
