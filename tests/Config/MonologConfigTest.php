@@ -15,25 +15,25 @@ final class MonologConfigTest extends TestCase
     public function testGetDefault(): void
     {
         $config = new MonologConfig();
-        self::assertSame(MonologConfig::DEFAULT_CHANNEL, $config->getDefault());
+        $this->assertSame(MonologConfig::DEFAULT_CHANNEL, $config->getDefault());
 
         $config = new MonologConfig(['default' => 'foo']);
-        self::assertSame('foo', $config->getDefault());
+        $this->assertSame('foo', $config->getDefault());
     }
 
     public function testGetEventLevel(): void
     {
         $config = new MonologConfig();
-        self::assertSame(Logger::DEBUG, $config->getEventLevel());
+        $this->assertSame(Logger::DEBUG, $config->getEventLevel());
 
         $config = new MonologConfig(['globalLevel' => Logger::INFO]);
-        self::assertSame(Logger::INFO, $config->getEventLevel());
+        $this->assertSame(Logger::INFO, $config->getEventLevel());
     }
 
     public function testGetHandlers(): void
     {
         $config = new MonologConfig();
-        self::assertEmpty(\iterator_to_array($config->getHandlers('foo')));
+        $this->assertEmpty(\iterator_to_array($config->getHandlers('foo')));
 
         $config = new MonologConfig([
             'handlers' => [
@@ -42,13 +42,16 @@ final class MonologConfigTest extends TestCase
                 ]
             ]
         ]);
-        self::assertInstanceOf(HandlerInterface::class, \iterator_to_array($config->getHandlers('foo'))[0]);
+        $this->assertInstanceOf(
+            HandlerInterface::class,
+            \iterator_to_array($config->getHandlers('foo'))[0]
+        );
     }
 
     public function testGetProcessors(): void
     {
         $config = new MonologConfig();
-        self::assertEmpty(\iterator_to_array($config->getProcessors('foo')));
+        $this->assertEmpty(\iterator_to_array($config->getProcessors('foo')));
 
         $config = new MonologConfig([
             'processors' => [
@@ -57,6 +60,9 @@ final class MonologConfigTest extends TestCase
                 ]
             ]
         ]);
-        self::assertInstanceOf(ProcessorInterface::class, \iterator_to_array($config->getProcessors('foo'))[0]);
+        $this->assertInstanceOf(
+            ProcessorInterface::class,
+            \iterator_to_array($config->getProcessors('foo'))[0]
+        );
     }
 }
