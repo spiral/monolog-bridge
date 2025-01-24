@@ -19,38 +19,14 @@ use Spiral\Monolog\Exception\ConfigException;
 
 class ProcessorsTest extends BaseTestCase
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->container->bind(FinalizerInterface::class, $finalizer = \Mockery::mock(FinalizerInterface::class));
-        $finalizer->shouldReceive('addFinalizer')->once();
-
-        $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
-            new class() implements LoaderInterface {
-                public function has(string $section): bool
-                {
-                    return false;
-                }
-
-                public function load(string $section): array
-                {
-                    return [];
-                }
-            }
-        ));
-        $this->container->bindSingleton(ListenerRegistryInterface::class, new ListenerRegistry());
-        $this->container->get(StrategyBasedBootloadManager::class)->bootload([MonologBootloader::class]);
-    }
-
     public function testDefaultProcessor(): void
     {
         $this->container->bind(MonologConfig::class, new MonologConfig());
 
         $logger = $this->container->get(LogsInterface::class)->getLogger('test');
-        $this->assertSame('test', $logger->getName());
-        $this->assertCount(1, $logger->getProcessors());
-        $this->assertInstanceOf(PsrLogMessageProcessor::class, $logger->getProcessors()[0]);
+        self::assertSame('test', $logger->getName());
+        self::assertCount(1, $logger->getProcessors());
+        self::assertInstanceOf(PsrLogMessageProcessor::class, $logger->getProcessors()[0]);
     }
 
     public function testInvalidProcessor(): void
@@ -60,9 +36,9 @@ class ProcessorsTest extends BaseTestCase
         $this->container->bind(MonologConfig::class, new MonologConfig([
             'processors' => [
                 'test' => [
-                    ['what?']
-                ]
-            ]
+                    ['what?'],
+                ],
+            ],
         ]));
 
         $this->container->get(LogsInterface::class)->getLogger('test');
@@ -73,15 +49,16 @@ class ProcessorsTest extends BaseTestCase
         $this->container->bind(MonologConfig::class, new MonologConfig([
             'processors' => [
                 'test' => [
-                    new PsrLogMessageProcessor()
-                ]
-            ]
+                    new PsrLogMessageProcessor(),
+                ],
+            ],
         ]));
 
-        $logger = $this->container->get(LogsInterface::class)->getLogger('test');;
+        $logger = $this->container->get(LogsInterface::class)->getLogger('test');
+        ;
 
-        $this->assertCount(1, $logger->getProcessors());
-        $this->assertInstanceOf(PsrLogMessageProcessor::class, $logger->getProcessors()[0]);
+        self::assertCount(1, $logger->getProcessors());
+        self::assertInstanceOf(PsrLogMessageProcessor::class, $logger->getProcessors()[0]);
     }
 
     public function testBindedProcessor(): void
@@ -90,16 +67,16 @@ class ProcessorsTest extends BaseTestCase
         $this->container->bind(MonologConfig::class, new MonologConfig([
             'processors' => [
                 'test' => [
-                    'PsrLogMessageProcessor'
-                ]
-            ]
+                    'PsrLogMessageProcessor',
+                ],
+            ],
         ]));
 
         $logger = $this->container->get(LogsInterface::class)->getLogger('test');
 
-        $this->assertCount(1, $logger->getProcessors());
-        $this->assertInstanceOf(PsrLogMessageProcessor::class, $logger->getProcessors()[0]);
-        $this->assertSame($this->container->get('PsrLogMessageProcessor'), $logger->getProcessors()[0]);
+        self::assertCount(1, $logger->getProcessors());
+        self::assertInstanceOf(PsrLogMessageProcessor::class, $logger->getProcessors()[0]);
+        self::assertSame($this->container->get('PsrLogMessageProcessor'), $logger->getProcessors()[0]);
     }
 
     public function testConstructProcessor(): void
@@ -108,16 +85,16 @@ class ProcessorsTest extends BaseTestCase
             'processors' => [
                 'test' => [
                     [
-                        'class' => PsrLogMessageProcessor::class
-                    ]
-                ]
-            ]
+                        'class' => PsrLogMessageProcessor::class,
+                    ],
+                ],
+            ],
         ]));
 
         $logger = $this->container->get(LogsInterface::class)->getLogger('test');
 
-        $this->assertCount(1, $logger->getProcessors());
-        $this->assertInstanceOf(PsrLogMessageProcessor::class, $logger->getProcessors()[0]);
+        self::assertCount(1, $logger->getProcessors());
+        self::assertInstanceOf(PsrLogMessageProcessor::class, $logger->getProcessors()[0]);
     }
 
     public function testConstructWithOptionsProcessor(): void
@@ -128,21 +105,45 @@ class ProcessorsTest extends BaseTestCase
                     [
                         'class'   => PsrLogMessageProcessor::class,
                         'options' => [
-                            'dateFormat' => 'c'
-                        ]
-                    ]
-                ]
-            ]
+                            'dateFormat' => 'c',
+                        ],
+                    ],
+                ],
+            ],
         ]));
 
         $logger = $this->container->get(LogsInterface::class)->getLogger('test');
         $processor = $logger->getProcessors()[0];
 
-        $this->assertCount(1, $logger->getProcessors());
-        $this->assertInstanceOf(PsrLogMessageProcessor::class, $processor);
+        self::assertCount(1, $logger->getProcessors());
+        self::assertInstanceOf(PsrLogMessageProcessor::class, $processor);
 
         $property = new \ReflectionProperty(PsrLogMessageProcessor::class, 'dateFormat');
 
-        $this->assertSame('c', $property->getValue($processor));
+        self::assertSame('c', $property->getValue($processor));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->container->bind(FinalizerInterface::class, $finalizer = \Mockery::mock(FinalizerInterface::class));
+        $finalizer->shouldReceive('addFinalizer')->once();
+
+        $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
+            new class implements LoaderInterface {
+                public function has(string $section): bool
+                {
+                    return false;
+                }
+
+                public function load(string $section): array
+                {
+                    return [];
+                }
+            },
+        ));
+        $this->container->bindSingleton(ListenerRegistryInterface::class, new ListenerRegistry());
+        $this->container->get(StrategyBasedBootloadManager::class)->bootload([MonologBootloader::class]);
     }
 }

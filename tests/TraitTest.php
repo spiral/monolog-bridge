@@ -25,20 +25,13 @@ final class TraitTest extends BaseTestCase
 {
     use LoggerTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->logger = null;
-    }
-
     public function testNoScope(): void
     {
         $c = new Container();
-        $c->runScope(new Scope(), function () {
+        $c->runScope(new Scope(), function (): void {
             $logger = $this->getLogger();
-            $this->assertInstanceOf(NullLogger::class, $this->getLogger());
-            $this->assertSame($logger, $this->getLogger());
+            self::assertInstanceOf(NullLogger::class, $this->getLogger());
+            self::assertSame($logger, $this->getLogger());
         });
     }
 
@@ -51,10 +44,10 @@ final class TraitTest extends BaseTestCase
 
         $c->bind(LogsInterface::class, $mock);
 
-        $c->runScope(new Scope(), function () {
+        $c->runScope(new Scope(), function (): void {
             $logger = $this->getLogger();
-            $this->assertInstanceOf(\Spiral\Logger\NullLogger::class, $this->getLogger());
-            $this->assertSame($logger, $this->getLogger());
+            self::assertInstanceOf(\Spiral\Logger\NullLogger::class, $this->getLogger());
+            self::assertSame($logger, $this->getLogger());
         });
     }
 
@@ -62,7 +55,7 @@ final class TraitTest extends BaseTestCase
     {
         $logger = new NullLogger();
         $this->setLogger($logger);
-        $this->assertSame($logger, $this->getLogger());
+        self::assertSame($logger, $this->getLogger());
     }
 
     public function testScope(): void
@@ -73,7 +66,7 @@ final class TraitTest extends BaseTestCase
         $this->container->bind(
             ConfiguratorInterface::class,
             new ConfigManager(
-                new class() implements LoaderInterface {
+                new class implements LoaderInterface {
                     public function has(string $section): bool
                     {
                         return false;
@@ -91,8 +84,15 @@ final class TraitTest extends BaseTestCase
         $this->container->bind(ListenerRegistryInterface::class, new ListenerRegistry());
 
         ContainerScope::runScope($this->container, function (): void {
-            $this->assertInstanceOf(Logger::class, $this->getLogger());
-            $this->assertSame(self::class, $this->getLogger()->getName());
+            self::assertInstanceOf(Logger::class, $this->getLogger());
+            self::assertSame(self::class, $this->getLogger()->getName());
         });
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->logger = null;
     }
 }

@@ -15,54 +15,48 @@ final class MonologConfigTest extends TestCase
     public function testGetDefault(): void
     {
         $config = new MonologConfig();
-        $this->assertSame(MonologConfig::DEFAULT_CHANNEL, $config->getDefault());
+        self::assertSame(MonologConfig::DEFAULT_CHANNEL, $config->getDefault());
 
         $config = new MonologConfig(['default' => 'foo']);
-        $this->assertSame('foo', $config->getDefault());
+        self::assertSame('foo', $config->getDefault());
     }
 
     public function testGetEventLevel(): void
     {
         $config = new MonologConfig();
-        $this->assertSame(Logger::DEBUG, $config->getEventLevel());
+        self::assertSame(Logger::DEBUG, $config->getEventLevel());
 
         $config = new MonologConfig(['globalLevel' => Logger::INFO]);
-        $this->assertSame(Logger::INFO, $config->getEventLevel());
+        self::assertSame(Logger::INFO, $config->getEventLevel());
     }
 
     public function testGetHandlers(): void
     {
         $config = new MonologConfig();
-        $this->assertEmpty(\iterator_to_array($config->getHandlers('foo')));
+        self::assertEmpty(\iterator_to_array($config->getHandlers('foo')));
 
         $config = new MonologConfig([
             'handlers' => [
                 'foo' => [
-                    $this->createMock(HandlerInterface::class)
-                ]
-            ]
+                    $this->createMock(HandlerInterface::class),
+                ],
+            ],
         ]);
-        $this->assertInstanceOf(
-            HandlerInterface::class,
-            \iterator_to_array($config->getHandlers('foo'))[0]
-        );
+        self::assertInstanceOf(HandlerInterface::class, \iterator_to_array($config->getHandlers('foo'))[0]);
     }
 
     public function testGetProcessors(): void
     {
         $config = new MonologConfig();
-        $this->assertEmpty(\iterator_to_array($config->getProcessors('foo')));
+        self::assertEmpty(\iterator_to_array($config->getProcessors('foo')));
 
         $config = new MonologConfig([
             'processors' => [
                 'foo' => [
-                    $this->createMock(ProcessorInterface::class)
-                ]
-            ]
+                    $this->createMock(ProcessorInterface::class),
+                ],
+            ],
         ]);
-        $this->assertInstanceOf(
-            ProcessorInterface::class,
-            \iterator_to_array($config->getProcessors('foo'))[0]
-        );
+        self::assertInstanceOf(ProcessorInterface::class, \iterator_to_array($config->getProcessors('foo'))[0]);
     }
 }
