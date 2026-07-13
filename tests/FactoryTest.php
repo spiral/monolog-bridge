@@ -24,7 +24,7 @@ use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\Monolog\Config\MonologConfig;
 use Spiral\Monolog\LogFactory;
 
-final class FactoryTest extends BaseTestCase
+class FactoryTest extends BaseTestCase
 {
     use MockeryPHPUnitIntegration;
 
@@ -33,9 +33,9 @@ final class FactoryTest extends BaseTestCase
         $factory = new LogFactory(new MonologConfig([]), new ListenerRegistry(), $this->container);
         $logger = $factory->getLogger();
 
-        self::assertNotEmpty($logger);
-        self::assertSame($logger, $factory->getLogger());
-        self::assertSame($logger, $factory->getLogger(MonologConfig::DEFAULT_CHANNEL));
+        $this->assertNotEmpty($logger);
+        $this->assertSame($logger, $factory->getLogger());
+        $this->assertSame($logger, $factory->getLogger(MonologConfig::DEFAULT_CHANNEL));
     }
 
     public function testChangedDefaultLogger(): void
@@ -44,9 +44,9 @@ final class FactoryTest extends BaseTestCase
 
         $logger = $factory->getLogger();
 
-        self::assertNotEmpty($logger);
-        self::assertSame($logger, $factory->getLogger());
-        self::assertSame($logger, $factory->getLogger('foo'));
+        $this->assertNotEmpty($logger);
+        $this->assertSame($logger, $factory->getLogger());
+        $this->assertSame($logger, $factory->getLogger('foo'));
     }
 
     public function testInjection(): void
@@ -55,7 +55,7 @@ final class FactoryTest extends BaseTestCase
         $logger = $factory->getLogger();
 
         $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
-            new class implements LoaderInterface {
+            new class() implements LoaderInterface {
                 public function has(string $section): bool
                 {
                     return false;
@@ -65,7 +65,7 @@ final class FactoryTest extends BaseTestCase
                 {
                     return [];
                 }
-            },
+            }
         ));
 
         $this->container->bind(FinalizerInterface::class, $finalizer = \Mockery::mock(FinalizerInterface::class));
@@ -74,9 +74,9 @@ final class FactoryTest extends BaseTestCase
         $this->container->get(StrategyBasedBootloadManager::class)->bootload([MonologBootloader::class]);
         $this->container->bind(LogFactory::class, $factory);
 
-        self::assertSame($logger, $this->container->get(Logger::class));
-        self::assertInstanceOf(LoggerInterface::class, $this->container->get(LoggerInterface::class));
-        self::assertSame($logger, $this->container->get(LoggerInterface::class));
+        $this->assertSame($logger, $this->container->get(Logger::class));
+        $this->assertInstanceOf(LoggerInterface::class, $this->container->get(LoggerInterface::class));
+        $this->assertSame($logger, $this->container->get(LoggerInterface::class));
     }
 
     public function testInjectionWithAttribute(): void
@@ -84,7 +84,7 @@ final class FactoryTest extends BaseTestCase
         $factory = new LogFactory(new MonologConfig([]), new ListenerRegistry(), new Container());
 
         $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
-            new class implements LoaderInterface {
+            new class() implements LoaderInterface {
                 public function has(string $section): bool
                 {
                     return false;
@@ -94,7 +94,7 @@ final class FactoryTest extends BaseTestCase
                 {
                     return [];
                 }
-            },
+            }
         ));
 
         $this->container->bind(FinalizerInterface::class, $finalizer = \Mockery::mock(FinalizerInterface::class));
@@ -103,15 +103,15 @@ final class FactoryTest extends BaseTestCase
         $this->container->get(StrategyBasedBootloadManager::class)->bootload([MonologBootloader::class]);
         $this->container->bind(LogFactory::class, $factory);
 
-        $this->container->invoke(static function (#[LoggerChannel('foo')] LoggerInterface $logger): void {
-            self::assertSame('foo', $logger->getName());
+        $this->container->invoke(function (#[LoggerChannel('foo')] LoggerInterface $logger) {
+            $this->assertSame('foo', $logger->getName());
         });
     }
 
-    public function testFinalizerShouldResetDefaultLogger(): void
+    public function testFinalizerShouldResetDefaultLogger()
     {
         $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
-            new class implements LoaderInterface {
+            new class() implements LoaderInterface {
                 public function has(string $section): bool
                 {
                     return false;
@@ -121,7 +121,7 @@ final class FactoryTest extends BaseTestCase
                 {
                     return [];
                 }
-            },
+            }
         ));
 
         $this->container->bind(FinalizerInterface::class, $finalizer = new Finalizer());
@@ -129,14 +129,14 @@ final class FactoryTest extends BaseTestCase
         $factory = new LogFactory(new MonologConfig([
             'handlers' => [
                 'default' => [
-                    $handler = \Mockery::mock(HandlerInterface::class, ResettableInterface::class),
-                ],
+                    $handler = \Mockery::mock(HandlerInterface::class, ResettableInterface::class)
+                ]
             ],
             'processors' => [
                 'default' => [
-                    $processor = \Mockery::mock(ProcessorInterface::class, ResettableInterface::class),
-                ],
-            ],
+                    $processor = \Mockery::mock(ProcessorInterface::class, ResettableInterface::class)
+                ]
+            ]
         ]), new ListenerRegistry(), $this->container);
 
         $handler->shouldReceive('reset')->twice();
@@ -148,10 +148,10 @@ final class FactoryTest extends BaseTestCase
         $finalizer->finalize();
     }
 
-    public function testFinalizerShouldNotResetLoggerWhenApplicationTerminating(): void
+    public function testFinalizerShouldNotResetLoggerWhenApplicationTerminating()
     {
         $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
-            new class implements LoaderInterface {
+            new class() implements LoaderInterface {
                 public function has(string $section): bool
                 {
                     return false;
@@ -161,7 +161,7 @@ final class FactoryTest extends BaseTestCase
                 {
                     return [];
                 }
-            },
+            }
         ));
 
         $this->container->bind(FinalizerInterface::class, $finalizer = new Finalizer());
@@ -169,14 +169,14 @@ final class FactoryTest extends BaseTestCase
         $factory = new LogFactory(new MonologConfig([
             'handlers' => [
                 'default' => [
-                    $handler = \Mockery::mock(HandlerInterface::class, ResettableInterface::class),
-                ],
+                    $handler = \Mockery::mock(HandlerInterface::class, ResettableInterface::class)
+                ]
             ],
             'processors' => [
                 'default' => [
-                    $processor = \Mockery::mock(ProcessorInterface::class, ResettableInterface::class),
-                ],
-            ],
+                    $processor = \Mockery::mock(ProcessorInterface::class, ResettableInterface::class)
+                ]
+            ]
         ]), new ListenerRegistry(), $this->container);
 
         $handler->shouldReceive('reset')->never();

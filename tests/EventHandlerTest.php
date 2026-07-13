@@ -14,6 +14,21 @@ final class EventHandlerTest extends TestCase
     private ListenerRegistry $registry;
     private object $listener;
 
+    protected function setUp(): void
+    {
+        $this->listener = new class() {
+            public LogEvent $event;
+
+            public function __invoke(LogEvent $event): void
+            {
+                $this->event = $event;
+            }
+        };
+
+        $this->registry = new ListenerRegistry();
+        $this->registry->addListener($this->listener);
+    }
+
     public function testHandle(): void
     {
         $handler = new EventHandler($this->registry);
@@ -26,11 +41,11 @@ final class EventHandlerTest extends TestCase
             'context' => ['foo' => 'bar'],
         ]);
 
-        self::assertSame('foo', $this->listener->event->getChannel());
-        self::assertSame('bar', $this->listener->event->getMessage());
-        self::assertSame(['foo' => 'bar'], $this->listener->event->getContext());
-        self::assertSame('debug', $this->listener->event->getLevel());
-        self::assertFalse($result);
+        $this->assertSame('foo', $this->listener->event->getChannel());
+        $this->assertSame('bar', $this->listener->event->getMessage());
+        $this->assertSame(['foo' => 'bar'], $this->listener->event->getContext());
+        $this->assertSame('debug', $this->listener->event->getLevel());
+        $this->assertFalse($result);
     }
 
     public function testHandleWithBubbleFalse(): void
@@ -45,25 +60,10 @@ final class EventHandlerTest extends TestCase
             'context' => ['foo' => 'bar'],
         ]);
 
-        self::assertSame('foo', $this->listener->event->getChannel());
-        self::assertSame('bar', $this->listener->event->getMessage());
-        self::assertSame(['foo' => 'bar'], $this->listener->event->getContext());
-        self::assertSame('debug', $this->listener->event->getLevel());
-        self::assertTrue($result);
-    }
-
-    protected function setUp(): void
-    {
-        $this->listener = new class {
-            public LogEvent $event;
-
-            public function __invoke(LogEvent $event): void
-            {
-                $this->event = $event;
-            }
-        };
-
-        $this->registry = new ListenerRegistry();
-        $this->registry->addListener($this->listener);
+        $this->assertSame('foo', $this->listener->event->getChannel());
+        $this->assertSame('bar', $this->listener->event->getMessage());
+        $this->assertSame(['foo' => 'bar'], $this->listener->event->getContext());
+        $this->assertSame('debug', $this->listener->event->getLevel());
+        $this->assertTrue($result);
     }
 }
