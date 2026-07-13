@@ -11,36 +11,51 @@ use Spiral\Boot\FinalizerInterface;
 use Spiral\Config\ConfigManager;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\LoaderInterface;
+use Spiral\Core\Container;
 use Spiral\Core\ContainerScope;
+use Spiral\Core\Scope;
 use Spiral\Logger\ListenerRegistry;
 use Spiral\Logger\ListenerRegistryInterface;
+use Spiral\Logger\LogsInterface;
 use Spiral\Logger\Traits\LoggerTrait;
 use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\Monolog\Config\MonologConfig;
 
-class TraitTest extends BaseTestCase
+final class TraitTest extends BaseTestCase
 {
     use LoggerTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->logger = null;
-    }
-
     public function testNoScope(): void
     {
-        $logger = $this->getLogger();
-        $this->assertInstanceOf(NullLogger::class, $this->getLogger());
-        $this->assertSame($logger, $this->getLogger());
+        $c = new Container();
+        $c->runScope(new Scope(), function (): void {
+            $logger = $this->getLogger();
+            self::assertInstanceOf(NullLogger::class, $this->getLogger());
+            self::assertSame($logger, $this->getLogger());
+        });
+    }
+
+    public function testLoggerInScope(): void
+    {
+        $c = new Container();
+        $mock = $this->createMock(LogsInterface::class);
+        $logger = new \Spiral\Logger\NullLogger(static fn() => null, '');
+        $mock->method('getLogger')->willReturn($logger);
+
+        $c->bind(LogsInterface::class, $mock);
+
+        $c->runScope(new Scope(), function (): void {
+            $logger = $this->getLogger();
+            self::assertInstanceOf(\Spiral\Logger\NullLogger::class, $this->getLogger());
+            self::assertSame($logger, $this->getLogger());
+        });
     }
 
     public function testSetLogger(): void
     {
         $logger = new NullLogger();
         $this->setLogger($logger);
-        $this->assertSame($logger, $this->getLogger());
+        self::assertSame($logger, $this->getLogger());
     }
 
     public function testScope(): void
@@ -48,26 +63,36 @@ class TraitTest extends BaseTestCase
         $this->container->bind(FinalizerInterface::class, $finalizer = \Mockery::mock(FinalizerInterface::class));
         $finalizer->shouldReceive('addFinalizer')->once();
 
-        $this->container->bind(ConfiguratorInterface::class, new ConfigManager(
-            new class() implements LoaderInterface {
-                public function has(string $section): bool
-                {
-                    return false;
-                }
+        $this->container->bind(
+            ConfiguratorInterface::class,
+            new ConfigManager(
+                new class implements LoaderInterface {
+                    public function has(string $section): bool
+                    {
+                        return false;
+                    }
 
-                public function load(string $section): array
-                {
-                    return [];
-                }
-            }
-        ));
+                    public function load(string $section): array
+                    {
+                        return [];
+                    }
+                },
+            ),
+        );
         $this->container->get(StrategyBasedBootloadManager::class)->bootload([MonologBootloader::class]);
         $this->container->bind(MonologConfig::class, new MonologConfig());
         $this->container->bind(ListenerRegistryInterface::class, new ListenerRegistry());
 
         ContainerScope::runScope($this->container, function (): void {
-            $this->assertInstanceOf(Logger::class, $this->getLogger());
-            $this->assertSame(self::class, $this->getLogger()->getName());
+            self::assertInstanceOf(Logger::class, $this->getLogger());
+            self::assertSame(self::class, $this->getLogger()->getName());
         });
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->logger = null;
     }
 }
